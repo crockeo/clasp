@@ -1,6 +1,6 @@
 # clasp
 
-Like [lips](http://github.com/crockeo/lips) but not written in Scala and more
+Like [lips](http://github.com/crockeo/lips) but not written in Haskell and more
 fleshed out. You can actually do things here. Like specific contexts.
 
 ### Building
