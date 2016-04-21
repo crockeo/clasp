@@ -1,6 +1,7 @@
 package com.crockeo.clasp
 
 import scala.util.parsing.combinator._
+import scala.util.parsing.input.Reader
 
 // The language definition as well as its parsing.
 object Language extends RegexParsers {
@@ -71,4 +72,16 @@ object Language extends RegexParsers {
     int |
     function |
     list
+
+  // Reducing a ParseResult to its value, throwing an exception on failure.
+  private def reduceResult[T](pr: ParseResult[T]): T = pr match {
+    case Success(t, _) => t
+    case _             => throw new Exception("Failed to parse.")
+  }
+
+  // Short-hand for parsing Tokens.
+  def parse(in: CharSequence): Token =
+    reduceResult(parse(clasp, in))
+  def parse(in: Reader[Char]): Token =
+    reduceResult(parse(clasp, in))
 }
