@@ -29,6 +29,10 @@ class ContextTests extends FunSuite {
       new Context(List(Map("a" -> TAtom("lol")))))
   }
 
+  test("contains") {
+    assert((new Context() + ("a" -> TAtom("aaa"))).contains("a"))
+  }
+
   test("apply") {
     assert((new Context() + ("a" -> TAtom("lol")))("a") ==
       TAtom("lol"))

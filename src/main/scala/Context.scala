@@ -37,6 +37,10 @@ class Context(private val cs: List[Map[String, Token]]) {
     }
   }
 
+  // Checking if the Context contains a value.
+  def contains(s: String): Boolean =
+    flatted.contains(s)
+
   // Accessing the values in this context.
   def apply(s: String): Token =
     flatted(s)
