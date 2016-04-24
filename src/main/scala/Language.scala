@@ -8,8 +8,9 @@ object Language extends RegexParsers {
   // Language tokens.
   sealed trait Token
 
-  case class TQuote(s: String)                         extends Token
+  case class TQuote(t: Token)                          extends Token
   case class TAtom(s: String)                          extends Token
+  case class TChar(c: Char)                            extends Token
   case class TString(s: String)                        extends Token
   case class TInt(n: Int)                              extends Token
   case class TFloat(n: Float)                          extends Token
@@ -18,11 +19,15 @@ object Language extends RegexParsers {
 
   // Parsing out a quote.
   lazy val quote: Parser[TQuote] =
-    "'[a-zA-z]+".r ^^ { s => TQuote(s.substring(1)) }
+    "'" ~ clasp ^^ { case ~(_, t) => TQuote(t) }
 
-  // Parsing out a singular ato.
+  // Parsing out a singular atom.
   lazy val atom: Parser[TAtom] =
-    "[a-zA-Z]+".r ^^ { TAtom(_) }
+    "([a-zA-Z]+(\\d|-|_)*|\\+|-|\\*|/|=\\[\\])".r ^^ { TAtom(_) }
+
+  // Parsing out a 
+  lazy val char: Parser[TChar] =
+    "'.'".r ^^ { s => TChar(s.charAt(1)) }
 
   // Parsing a quoted string.
   lazy val string: Parser[TString] =
