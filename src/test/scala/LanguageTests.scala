@@ -15,7 +15,7 @@ class LanguageParseTests extends FunSuite {
 
   test("quote") {
     val p = correctParser(quote)_
-    assert(p("'test", TQuote("test")))
+    assert(p("'test", TQuote(TAtom("test"))))
   }
 
   test("atom") {
@@ -73,7 +73,7 @@ class LanguageParseTests extends FunSuite {
   test("clasp") {
     val p = correctParser(clasp)_
 
-    assert(p("'test", TQuote("test")))
+    assert(p("'test", TQuote(TAtom("test"))))
     assert(p("test", TAtom("test")))
     assert(p("\"test\"", TString("test")))
     assert(p("5", TInt(5)))

@@ -23,7 +23,7 @@ object Language extends RegexParsers {
 
   // Parsing out a singular atom.
   lazy val atom: Parser[TAtom] =
-    "([a-zA-Z]+(\\d|-|_)*|\\+|-|\\*|/|=\\[\\])".r ^^ { TAtom(_) }
+    "([a-zA-Z]+(\\d|-|_)*|\\+|-|\\*|/|\\[\\])".r ^^ { TAtom(_) }
 
   // Parsing out a 
   lazy val char: Parser[TChar] =
