@@ -41,7 +41,7 @@ object Result {
 
   case class TList(l: List[Token]) extends Token {
     override def toString(): String =
-      l.map(_.toString).foldLeft("")(_ + " " + _)
+      "(" + l.map(_.toString).foldLeft("")(_ + " " + _) + ")"
   }
 
   // Errors to do with language evaluation. Parse errors are handled by the parser

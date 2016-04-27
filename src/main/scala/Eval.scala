@@ -128,13 +128,13 @@ object Eval {
     case TList(List(TAtom("print"), TQuote(TAtom("noline")), t)) => {
       for {
         e <- Eval(t, c)
-      } yield { print(e._1.toString); e }
+      } yield { print(e._1.toString); (Language.none, e._2) }
     }
 
     case TList(List(TAtom("print"), t)) => {
       for {
         e <- Eval(t, c)
-      } yield { println(e._1.toString); e }
+      } yield { println(e._1.toString); (Language.none, e._2) }
     }
 
     // TODO: Printing multiple values at a time.
