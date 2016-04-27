@@ -9,7 +9,7 @@ object Eval {
   // Helper functions.
 
   // Reducing a list of tokens down into a single token by some passed function.
-  private def reduceList(t: List[Token], c: Context)(fn: (Token, Token) => ClaspResult): ClaspResult = { println(t); t match {
+  private def reduceList(t: List[Token], c: Context)(fn: (Token, Token) => ClaspResult): ClaspResult = t match {
     case Nil          => Left(new ClaspError(ClaspError.ValueError, "Error: You cannot reduce an empty list."))
     case x :: Nil     => Right((x, c))
     case x :: y :: xs => for {
@@ -18,7 +18,7 @@ object Eval {
       fd <- fn(ex._1, ey._1)
       v  <- reduceList(fd._1 :: xs, fd._2)(fn)
     } yield v
-  }}
+  }
 
   ////
   // The set of built-in functions.
@@ -115,19 +115,12 @@ object Eval {
   }
 
   // Converting a token to its string representation.
-  private def builtin_tostr(t: Token, c: Context): ClaspResult = {
-    def toString(t: Token): String = t match {
-      case TQuote(t)             => s"'${toString(t)}"
-      case TAtom(a)              => s"${a}"
-      case TChar(c)              => s"'{c}'"
-      case TString(s)            => "\"" + s + "\""
-      case TInt(n)               => n.toString
-      case TFloat(f)             => f.toString
-      case TFunction(args, body) => "(todo: functions)" // TODO
-      case TList(l)              => s"(${l.map(toString).foldLeft("")(_ + _)})"
-    }
+  private def builtin_tostr(t: Token, c: Context): ClaspResult = t match {
+    case TList(List(TAtom("tostr"), t)) =>
+      Right(TString(t.toString), c)
 
-    Right(TString(toString(t)), c)
+    case _ =>
+      Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: exec"))
   }
 
   // Printing out to the console.
@@ -135,15 +128,13 @@ object Eval {
     case TList(List(TAtom("print"), TQuote(TAtom("noline")), t)) => {
       for {
         e <- Eval(t, c)
-        s <- builtin_tostr(e._1, e._2)
-      } yield { print(s); s }
+      } yield { print(e._1.toString); e }
     }
 
     case TList(List(TAtom("print"), t)) => {
       for {
         e <- Eval(t, c)
-        s <- builtin_tostr(e._1, e._2)
-      } yield { println(s); s }
+      } yield { println(e._1.toString); e }
     }
 
     // TODO: Printing multiple values at a time.

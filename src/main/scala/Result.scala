@@ -4,14 +4,45 @@ object Result {
   // Language tokens.
   sealed trait Token
 
-  case class TQuote(t: Token)                          extends Token
-  case class TAtom(s: String)                          extends Token
-  case class TChar(c: Char)                            extends Token
-  case class TString(s: String)                        extends Token
-  case class TInt(n: Int)                              extends Token
-  case class TFloat(n: Float)                          extends Token
-  case class TFunction(args: List[TAtom], body: Token) extends Token
-  case class TList(l: List[Token])                     extends Token
+  case class TQuote(t: Token) extends Token {
+    override def toString(): String =
+      s"'$t"
+  }
+
+  case class TAtom(s: String) extends Token {
+    override def toString(): String =
+      s"$s"
+  }
+
+  case class TChar(c: Char) extends Token {
+    override def toString(): String =
+      s"'$c'"
+  }
+
+  case class TString(s: String) extends Token {
+    override def toString(): String =
+      "\"" + s + "\""
+  }
+
+  case class TInt(n: Int) extends Token {
+    override def toString(): String =
+      s"$n"
+  }
+
+  case class TFloat(n: Float) extends Token {
+    override def toString(): String =
+      s"$n"
+  }
+
+  case class TFunction(args: List[TAtom], body: Token) extends Token {
+    override def toString(): String =
+      "(TODO: FUnction)"
+  }
+
+  case class TList(l: List[Token]) extends Token {
+    override def toString(): String =
+      l.map(_.toString).foldLeft("")(_ + " " + _)
+  }
 
   // Errors to do with language evaluation. Parse errors are handled by the parser
   // themselves.
@@ -24,7 +55,10 @@ object Result {
     case object TypeError   extends Kind
   }
 
-  class ClaspError(kind: ClaspError.Kind, ctx: String) extends Exception { }
+  class ClaspError(kind: ClaspError.Kind, ctx: String) extends Exception {
+    override def toString(): String =
+      s"ClaspError: ${kind.toString}: ${ctx}"
+  }
 
   type ClaspResult = Either[ClaspError, (Token, Context)]
 
