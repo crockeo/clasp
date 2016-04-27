@@ -6,6 +6,7 @@ object ClaspError {
   sealed trait Kind
 
   case object SyntaxError extends Kind
+  case object SystemError extends Kind
   case object ValueError  extends Kind
   case object TypeError   extends Kind
 }
@@ -144,7 +145,7 @@ object Eval {
   private def builtin_tostr(t: Token, c: Context): ClaspResult = {
     def toString(t: Token): String = t match {
       case TQuote(t)             => s"'${toString(t)}"
-      case TAtom(a)              => s"a"
+      case TAtom(a)              => s"${a}"
       case TChar(c)              => s"'{c}'"
       case TString(s)            => "\"" + s + "\""
       case TInt(n)               => n.toString
@@ -160,21 +161,19 @@ object Eval {
   private def builtin_print(t: Token, c: Context): ClaspResult = t match {
     case TList(List(TAtom("print"), TQuote(TAtom("noline")), t)) => {
       for {
-        s <- builtin_tostr(t, c)
+        e <- Eval(t, c)
+        s <- builtin_tostr(e._1, e._1)
       } yield { print(s); s }
     }
 
-    case TList(List(TAtom("print"), TString(s))) => {
+    case TList(List(TAtom("print"), t)) => {
       for {
-        s <- builtin_tostr(t, c)
+        e <- Eval(t, c)
+        s <- builtin_tostr(e._1, e._2)
       } yield { println(s); s }
     }
 
-    //case TList(TAtom("print") :: TQuote(TAtom("noline")) :: xs) =>
-      //builtin_print(TList(List(TAtom("print"), TQuote(TAtom("noline")), TString(xs.map(_.toString).foldLeft("")(_ + _)))), c)
-
-    //case TList(TAtom("print") :: xs) =>
-      //builtin_print(TList(List(TAtom("print"), TString(xs.map(_.toString).foldLeft("")(_ + "\n" + _)))), c)
+    // TODO: Printing multiple values at a time.
 
     case _ =>
       Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: print"))

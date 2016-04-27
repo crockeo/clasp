@@ -84,9 +84,24 @@ object Language extends RegexParsers {
     case _             => throw new Exception("Failed to parse.")
   }
 
+  // The "none" value in the language.
+  val none: Token =
+    TList(List())
+
   // Short-hand for parsing Tokens.
   def parse(in: CharSequence): Token =
     reduceResult(parse(clasp, in))
   def parse(in: Reader[Char]): Token =
     reduceResult(parse(clasp, in))
+
+  // Short-hand for parsing a set of tokens in.
+  def parseSet(in: CharSequence): List[Token] = parse(clasp, in) match {
+    case Success(t, r) => t :: parseSet(r)
+    case _             => Nil
+  }
+
+  def parseSet(in: Reader[Char]): List[Token] = parse(clasp, in) match {
+    case Success(t, r) => t :: parseSet(r)
+    case _             => Nil
+  }
 }

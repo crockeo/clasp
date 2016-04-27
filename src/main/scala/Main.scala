@@ -35,7 +35,7 @@ object Main {
 
   // Parsing out a list of files.
   def parseFiles(paths: List[String]): Unit =
-    File.run(paths, new Context()) 
+    File.run(paths, new Context())
 
   // The entry point to the application.
   def main(args: Array[String]): Unit = args.toList match {
