@@ -5,17 +5,7 @@ import scala.util.parsing.input.Reader
 
 // The language definition as well as its parsing.
 object Language extends RegexParsers {
-  // Language tokens.
-  sealed trait Token
-
-  case class TQuote(t: Token)                          extends Token
-  case class TAtom(s: String)                          extends Token
-  case class TChar(c: Char)                            extends Token
-  case class TString(s: String)                        extends Token
-  case class TInt(n: Int)                              extends Token
-  case class TFloat(n: Float)                          extends Token
-  case class TFunction(args: List[TAtom], body: Token) extends Token
-  case class TList(l: List[Token])                     extends Token
+  import Result._
 
   // Parsing out a quote.
   lazy val quote: Parser[TQuote] =

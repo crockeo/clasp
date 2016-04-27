@@ -1,6 +1,6 @@
 package com.crockeo.clasp;
 
-import Language.Token
+import Result._
 
 // A class to manage contexts.
 class Context(private val cs: List[Map[String, Token]]) {

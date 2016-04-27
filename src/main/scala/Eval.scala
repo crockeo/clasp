@@ -1,36 +1,9 @@
 package com.crockeo.clasp
 
-// Errors to do with language evaluation. Parse errors are handled by the parser
-// themselves.
-object ClaspError {
-  sealed trait Kind
-
-  case object SyntaxError extends Kind
-  case object SystemError extends Kind
-  case object ValueError  extends Kind
-  case object TypeError   extends Kind
-}
-
-class ClaspError(kind: ClaspError.Kind, ctx: String) extends Exception { }
-
 // Evaluation of language constructs.
 object Eval {
   import Language._
-
-  type ClaspResult = Either[ClaspError, (Token, Context)]
-
-  // Implementing Functor & Monad over an Either.
-  implicit class EitherCollection[A, B](e: Either[A, B]) {
-    def map[C](f: B => C): Either[A, C] = e match {
-      case Left(a)  => Left(a)
-      case Right(b) => Right(f(b))
-    }
-
-    def flatMap[C](f: B => Either[A, C]): Either[A, C] = e match {
-      case Left(a) => Left(a)
-      case Right(b) => f(b)
-    }
-  }
+  import Result._
 
   ////
   // Helper functions.
