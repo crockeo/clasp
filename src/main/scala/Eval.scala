@@ -162,7 +162,7 @@ object Eval {
     case TList(List(TAtom("print"), TQuote(TAtom("noline")), t)) => {
       for {
         e <- Eval(t, c)
-        s <- builtin_tostr(e._1, e._1)
+        s <- builtin_tostr(e._1, e._2)
       } yield { print(s); s }
     }
 
