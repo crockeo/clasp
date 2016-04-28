@@ -5,6 +5,7 @@ import org.scalatest._
 // Testing language parsing.
 class LanguageParseTests extends FunSuite {
   import Language._
+  import Result._
 
   // Checking that a parser is correct.
   def correctParser[T](p: Parser[T])(s: String, t: T): Boolean =
@@ -23,6 +24,13 @@ class LanguageParseTests extends FunSuite {
 
     assert(p("test", TAtom("test")))
     assert(!p("\"test\"", TAtom("test")))
+  }
+
+  test("bool") {
+    val p = correctParser(bool)_
+
+    assert(p("#t", TBool(true)))
+    assert(p("#f", TBool(false)))
   }
 
   test("string") {
@@ -75,6 +83,8 @@ class LanguageParseTests extends FunSuite {
 
     assert(p("'test", TQuote(TAtom("test"))))
     assert(p("test", TAtom("test")))
+    assert(p("#t", TBool(true)))
+    assert(p("#f", TBool(false)))
     assert(p("\"test\"", TString("test")))
     assert(p("5", TInt(5)))
     assert(p("5.0", TFloat(5)))

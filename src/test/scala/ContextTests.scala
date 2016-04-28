@@ -4,6 +4,7 @@ import org.scalatest._
 
 class ContextTests extends FunSuite {
   import Language._
+  import Result._
 
   test("default constructor") {
     assert(new Context() == new Context(List(Map(): Map[String, Token])))

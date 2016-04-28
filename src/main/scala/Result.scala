@@ -14,6 +14,14 @@ object Result {
       s"$s"
   }
 
+  case class TBool(b: Boolean) extends Token {
+    override def toString(): String =
+      if (b)
+        "#t"
+      else
+        "#f"
+  }
+
   case class TChar(c: Char) extends Token {
     override def toString(): String =
       s"'$c'"

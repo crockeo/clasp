@@ -15,6 +15,11 @@ object Language extends RegexParsers {
   lazy val atom: Parser[TAtom] =
     "([a-zA-Z]+(\\d|-|_)*|\\+|-|\\*|/|\\[\\])".r ^^ { TAtom(_) }
 
+  // Parsing out a boolean.
+  lazy val bool: Parser[TBool] =
+    "#t" ^^ { _ => TBool(true) } |
+    "#f" ^^ { _ => TBool(false) }
+
   // Parsing out a 
   lazy val char: Parser[TChar] =
     "'.'".r ^^ { s => TChar(s.charAt(1)) }
@@ -62,6 +67,7 @@ object Language extends RegexParsers {
   lazy val clasp: Parser[Token] =
     quote |
     atom |
+    bool |
     string |
     float |
     int |

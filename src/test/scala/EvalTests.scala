@@ -4,6 +4,7 @@ import org.scalatest._
 
 class EvalTests extends FunSuite {
   import Language._
+  import Result._
 
   // TODO: SO MANY FUCKING TESTS
 
