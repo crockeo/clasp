@@ -17,6 +17,10 @@ class Context(private val cs: List[Map[String, Token]]) {
   private lazy val flatted: Map[String, Token] =
     cs.foldRight(Map(): Map[String, Token])((a, b) => b ++ a)
 
+  // Turning the context to a string.
+  override def toString(): String =
+    s"Context(${flatted.toString})"
+
   // Adding an (empty) context map on top of the context.
   def push(): Context =
     new Context((Map(): Map[String, Token]) :: cs)

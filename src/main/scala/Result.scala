@@ -48,8 +48,10 @@ object Result {
   }
 
   case class TList(l: List[Token]) extends Token {
-    override def toString(): String =
-      "(" + l.map(_.toString).foldLeft("")(_ + " " + _) + ")"
+    override def toString(): String = l match {
+      case Nil => "()"
+      case _   => l.drop(1).map(_.toString).foldLeft(s"(${l(0).toString}")(_ + " " + _) + ")"
+    }
   }
 
   // Errors to do with language evaluation. Parse errors are handled by the parser
