@@ -189,18 +189,35 @@ object Eval {
   ////
   // General evaluation.
 
+  // Evaluating a list of arguments.
+  def evalList(l: List[Token], c: Context): ClaspResult =
+    l.foldRight(Right((TList(Nil), c)): ClaspResult)((v, p) => p match {
+      case Left(err)             => Left(err)
+      case Right((TList(xs), c)) => Eval(v, c) match {
+        case Left(err)     => Left(err)
+        case Right((v, c)) => Right(TList(v :: xs), c)
+      }
+
+      case _                     =>
+        Left(new ClaspError(ClaspError.SyntaxError, "Malformed list evaluation - I don't know how this happened."))
+    })
+
   // Evaluating a token into its reduced form.
-  def apply(t: Token, c: Context): Either[ClaspError, (Token, Context)] = t match {
+  def apply(t: Token, c: Context): ClaspResult = t match {
     // Variable replacement.
     case TAtom(s) if (c.contains(s)) => Right((c(s), c))
 
-    // Built-ins.
-    case TList(TAtom(name) :: xs) if (builtIns.contains(name)) => builtIns(name)(t, c)
+    // Working with lists.
+    case TList(l) => evalList(l, c) match {
+      case Left(err) => Left(err)
+      case Right(t)  => t._1 match {
+        case TList(TAtom(name) :: xs) if (builtIns.contains(name)) => builtIns(name)(t._1, t._2)
+        case TList(TFunction(_, _) :: xs)                          => applyFn(t._1, t._2)
+        case _                                                     => Right(t)
+      }
+    }
 
-    // Function application.
-    case TList(TFunction(_, _) :: xs) => applyFn(t, c)
-    // TODO: Named function variables?
-
+    // Not evaluating everything else.
     case _ => Right((t, c))
   }
 }
