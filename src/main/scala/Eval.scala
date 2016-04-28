@@ -204,7 +204,15 @@ object Eval {
       Right(Language.none, c)
     }
 
-    // TODO: Printing multiple values at a time.
+    case TList(TAtom("print") :: TQuote(TAtom("noline")) :: xs) if (xs != Nil) => {
+      print(xs.map(_.toString).reduceLeft(_ + " " + _))
+      Right(Language.none, c)
+    }
+
+    case TList(TAtom("print") :: xs) if (xs != Nil) => {
+      println(xs.map(_.toString).reduceLeft(_ + " " + _))
+      Right(Language.none, c)
+    }
 
     case _ =>
       Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: print"))
