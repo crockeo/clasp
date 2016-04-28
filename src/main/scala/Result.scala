@@ -44,7 +44,7 @@ object Result {
 
   case class TFunction(args: List[TAtom], body: Token) extends Token {
     override def toString(): String =
-      "(TODO: FUnction)"
+      s"(lambda ${TList(args)} ${body})"
   }
 
   case class TList(l: List[Token]) extends Token {
