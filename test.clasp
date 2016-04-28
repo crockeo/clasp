@@ -1,1 +1,8 @@
-(print "hello world!")
+(def pow (lambda (n p)
+  (if (== p 0)
+    1
+    (if (== p 1)
+      a
+      (* a (pow a (- p 1)))))))
+
+(print (pow 2 3))

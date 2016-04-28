@@ -35,6 +35,75 @@ object Eval {
       Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: def"))
   }
 
+  // Checking the equality between 2 values.
+  private def builtin_eq(t: Token, c: Context): ClaspResult = t match {
+    case TList(List(TAtom("="), t1, t2)) =>
+      Right(TBool(t1 == t2), c)
+
+    case _ =>
+      Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: eq"))
+  }
+
+  // Negating a boolean or an integer.
+  private def builtin_not(t: Token, c: Context): ClaspResult = t match {
+    case TList(List(TAtom("!"), t)) => t match {
+      case TBool(b) => Right(TBool(!b), c)
+      case TInt(n) => Right(TInt(~n), c)
+
+      case _ =>
+        Left(new ClaspError(ClaspError.SyntaxError,
+          "Invalid call to builtin: not; you can only negate booleans and integers."))
+    }
+
+    case _ =>
+      Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: not"))
+  }
+
+  // AND-ing together 2 booleans 2 integers.
+  private def builtin_and(t: Token, c: Context): ClaspResult = t match {
+    case TList(List(TAtom("&"), t1, t2)) => (t1, t2) match {
+      case (TBool(b1), TBool(b2)) => Right(TBool(b1 && b2), c)
+      case (TInt(n1), TInt(n2)) => Right(TInt(n1 & n2), c)
+
+      case _ =>
+        Left(new ClaspError(ClaspError.SyntaxError,
+          "Invalid call to builtin: and; you can only AND booleans and integers."))
+    }
+
+    case _ =>
+      Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: and"))
+  }
+
+  // OR-ing together 2 booleans or 2 integers.
+  private def builtin_or(t: Token, c: Context): ClaspResult = t match {
+    case TList(List(TAtom("|"), t1, t2)) => (t1, t2) match {
+      case (TBool(b1), TBool(b2)) => Right(TBool(b1 || b2), c)
+      case (TInt(n1), TInt(n2)) => Right(TInt(n1 | n2), c)
+
+      case _ =>
+        Left(new ClaspError(ClaspError.SyntaxError,
+          "Invalid call to builtin: and; you can only OR booleans and integers."))
+    }
+
+    case _ =>
+      Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: or"))
+  }
+
+  // XOR-ing together 2 booleans or 2 integers.
+  private def builtin_xor(t: Token, c: Context): ClaspResult = t match {
+    case TList(List(TAtom("^"), t1, t2)) => (t1, t2) match {
+      case (TBool(b1), TBool(b2)) => Right(TBool(b1 ^ b2), c)
+      case (TInt(n1), TInt(n2)) => Right(TInt(n1 ^ n2), c)
+
+      case _ =>
+        Left(new ClaspError(ClaspError.SyntaxError,
+          "Invalid call to builtin: and; you can only XOR booleans and integers."))
+    }
+
+    case _ =>
+      Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: xor"))
+  }
+
   // Joining a list of elements (can be anything).
   private def builtin_add(t: Token, c: Context): ClaspResult = t match {
     case TList(TAtom("+") :: xs) =>
@@ -126,15 +195,13 @@ object Eval {
   // Printing out to the console.
   private def builtin_print(t: Token, c: Context): ClaspResult = t match {
     case TList(List(TAtom("print"), TQuote(TAtom("noline")), t)) => {
-      for {
-        e <- Eval(t, c)
-      } yield { print(e._1.toString); (Language.none, e._2) }
+      print(t)
+      Right(Language.none, c)
     }
 
     case TList(List(TAtom("print"), t)) => {
-      for {
-        e <- Eval(t, c)
-      } yield { println(e._1.toString); (Language.none, e._2) }
+      println(t)
+      Right(Language.none, c)
     }
 
     // TODO: Printing multiple values at a time.
@@ -143,8 +210,23 @@ object Eval {
       Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: print"))
   }
 
+  // If/else blocks.
+  private def builtin_if(t: Token, c: Context): ClaspResult = t match {
+    case TList(List(TAtom("if"), TBool(b), t, f)) =>
+      if (b) Eval(t, c)
+      else   Eval(f, c)
+
+    case _ =>
+      Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: if"))
+  }
+
   // The set of built-in functions.
   private val builtIns: Map[String, (Token, Context) => ClaspResult] = Map(
+    "=" -> builtin_eq,
+    "not" -> builtin_not,
+    "|" -> builtin_or,
+    "&" -> builtin_and,
+    "^" -> builtin_xor,
     "def" -> builtin_def,
     "+"   -> builtin_add,
     "-"   -> builtin_sub,
@@ -153,7 +235,8 @@ object Eval {
     "[]"  -> builtin_index,
     "exec" -> builtin_exec,
     "tostr" -> builtin_tostr,
-    "print" -> builtin_print
+    "print" -> builtin_print,
+    "if" -> builtin_if
   )
 
   ////
