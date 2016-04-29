@@ -107,7 +107,19 @@ object Eval {
   // Joining a list of elements (can be anything).
   private def builtin_add(t: Token, c: Context): ClaspResult = t match {
     case TList(TAtom("+") :: xs) =>
-      ???
+      reduceList(xs, c)((a, b) => (a, b) match {
+        case (TString(s), t) => Right(TString(s + t.toString), c)
+        case (t, TString(s)) => Right(TString(t.toString + s), c)
+
+        case (TInt(x),   TInt(y))   => Right(TInt(x - y), c)
+        case (TFloat(x), TInt(y))   => Right(TFloat(x - y), c)
+        case (TInt(x),   TFloat(y)) => Right(TFloat(x - y), c)
+        case (TFloat(x), TFloat(y)) => Right(TFloat(x - y), c)
+
+        case _ =>
+          Left(new ClaspError(ClaspError.TypeError,
+            s"Failed to join '$a' and '$b'."))
+      })
 
     case _ =>
       Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: +"))
