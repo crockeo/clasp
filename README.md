@@ -1,11 +1,17 @@
 # clasp
 
-Like [lips](http://github.com/crockeo/lips) but not written in Haskell and more
-fleshed out. You can actually do things here. Like specific contexts.
+A LISP built in Scala to learn some basic programming language theory. Simple
+interpreted language with basic features (ie addition, string stuff, if
+statements, etc.)
 
 ### Building
 
-Use `sbt`. It'll handle dependencies and everything for you.
+For development purposes, simply use `sbt` within the directory and use it
+normally.
+
+For deployment, use `sbt install` and `sbt uninstall`. It'll install a bash
+script named `clasp` into `/usr/local/bin` that executes the `clasp.jar` within
+the project's directory.
 
 ### Licensing
 
