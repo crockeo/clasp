@@ -25,14 +25,33 @@ object Eval {
 
   // Defining variables.
   private def builtin_def(t: Token, c: Context): ClaspResult = t match {
-    case TList(List(TAtom("def"), TAtom(name), v)) if (!builtIns.contains(name)) =>
-      Eval(v, c) match {
-        case Right((ev, ec)) => Right(ev, ec + (name -> ev))
-        case Left(v)         => Left(v)
+    case TList(List(TAtom("def"), TAtom(name), v)) =>
+      if (builtIns.contains(name))
+        Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin def; cannot redefine builtin values."))
+      else
+        Eval(v, c) match {
+          case Right((ev, ec)) => Right(ev, ec + (name -> ev))
+          case Left(v)         => Left(v)
+        }
+
+    case _ =>
+      Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: def; invalid syntax."))
+  }
+
+  // Defining functions.
+  private def builtin_defn(t: Token, c: Context): ClaspResult = t match {
+    case TList(List(TAtom("defn"), TAtom(name), TList(args), body)) =>
+      if (builtIns.contains(name))
+        Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: defn; cannot redefine builtin functions."))
+      else {
+        Eval(Language.parse(s"(def $name (lambda ${TList(args)} $body))"), c) match {
+          case Right(r)  => Right(r)
+          case Left(err) => Left(err)
+        }
       }
 
     case _ =>
-      Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: def"))
+      Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: defn; invalid syntax."))
   }
 
   // Checking the equality between 2 values.
@@ -111,10 +130,10 @@ object Eval {
         case (TString(s), t) => Right(TString(s + t.toString), c)
         case (t, TString(s)) => Right(TString(t.toString + s), c)
 
-        case (TInt(x),   TInt(y))   => Right(TInt(x - y), c)
-        case (TFloat(x), TInt(y))   => Right(TFloat(x - y), c)
-        case (TInt(x),   TFloat(y)) => Right(TFloat(x - y), c)
-        case (TFloat(x), TFloat(y)) => Right(TFloat(x - y), c)
+        case (TInt(x),   TInt(y))   => Right(TInt(x + y), c)
+        case (TFloat(x), TInt(y))   => Right(TFloat(x + y), c)
+        case (TInt(x),   TFloat(y)) => Right(TFloat(x + y), c)
+        case (TFloat(x), TFloat(y)) => Right(TFloat(x + y), c)
 
         case _ =>
           Left(new ClaspError(ClaspError.TypeError,
@@ -248,6 +267,7 @@ object Eval {
     "&" -> builtin_and,
     "^" -> builtin_xor,
     "def" -> builtin_def,
+    "defn" -> builtin_defn,
     "+"   -> builtin_add,
     "-"   -> builtin_sub,
     "*"   -> builtin_mul,
@@ -309,6 +329,11 @@ object Eval {
   def apply(t: Token, c: Context): ClaspResult = t match {
     // Variable replacement.
     case TAtom(s) if (c.contains(s)) => Right((c(s), c))
+
+    // We have to single out defn out of list application because it can't have
+    // the rest of the arguments be applied yet.
+    case TList(TAtom("defn") :: xs) =>
+      builtin_defn(TList(TAtom("defn") :: xs), c)
 
     // Working with lists.
     case TList(l) => evalList(l, c) match {

@@ -77,7 +77,8 @@ object Language extends RegexParsers {
   // Reducing a ParseResult to its value, throwing an exception on failure.
   private def reduceResult[T](pr: ParseResult[T]): T = pr match {
     case Success(t, _) => t
-    case _             => throw new Exception("Failed to parse.")
+    case Failure(e, _) => throw new Exception(s"Failed to parse: $e.")
+    case Error  (e, _) => throw new Exception(s"Failed to parse: $e.")
   }
 
   // The "none" value in the language.
