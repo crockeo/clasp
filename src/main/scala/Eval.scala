@@ -294,7 +294,7 @@ object Eval {
 
         // TODO: One day make this less disgusting.
         body match {
-          case TList(b) => b.foldLeft(Right(t, c): ClaspResult)((p, t) => p match {
+          case TList(b) => b.foldLeft(Right(t, ec): ClaspResult)((p, t) => p match {
             case Left(err)     => Left(err)
             case Right((_, c)) => Eval(t, c) match {
               case Left(err)     => Left(err)
