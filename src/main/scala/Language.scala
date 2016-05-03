@@ -101,4 +101,27 @@ object Language extends RegexParsers {
     case Success(t, r) => t :: parseSet(r)
     case _             => Nil
   }
+
+  // Reducing the result from a parseSafe call into something usable.
+  private def reduceSafeParse(pr: ParseResult[Token]): Either[ClaspError, List[Token]] = pr match {
+    case Success(t, r) if (r.atEnd) => Right(List(t))
+    case Success(t, r)              =>
+      parseSafe(r) match {
+        case Left(err) => Left(err)
+        case Right(ts) => Right(t :: ts)
+      }
+
+    case Failure(t, _) =>
+      Left(new ClaspError(ClaspError.SyntaxError, "Failed to parse: " + t))
+    case Error  (t, _) =>
+      Left(new ClaspError(ClaspError.SyntaxError, "Failed to parse: " + t))
+  }
+
+  // Safely parsing out a list of tokens (returning errors).
+  def parseSafe(in: CharSequence): Either[ClaspError, List[Token]] =
+    reduceSafeParse(parse(clasp, in))
+
+  // Safely parsing out a list of tokens (returning errors).
+  def parseSafe(in: Reader[Char]): Either[ClaspError, List[Token]] =
+    reduceSafeParse(parse(clasp, in))
 }
