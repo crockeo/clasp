@@ -1,0 +1,19 @@
+(defn geq (a b)
+  (| (= a b) (> a b)))
+
+(defn leq (a b)
+  (| (= a b) (< a b)))
+
+(defn bool-switch (cases)
+  ((defn bool-switch-helper (n)
+    (if (geq n (len cases))
+      ()
+      (if ([] 0 ([] n cases))
+        (exec ([] 1 ([] n cases)))
+        (bool-switch-helper (+ n 1))))) 0))
+
+(defn switch (val cases)
+  (defn switch-helper (n)
+    (bool-switch
+      (((== val ([] 0 ([] n cases))) '(exec ([] 1 ([] n cases)))))
+       (#t                           '(switch-helper (+ n 1))))))

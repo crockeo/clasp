@@ -26,11 +26,16 @@ object Main {
   }
 
   // Starting the repl.
-  def startRepl(): Unit = {
+  def startRepl(withPrelude: Boolean): Unit =
+  if (withPrelude) {
     File.run(List(preludePath, userPrelude), new Context()) match {
-      case Left(err) => throw err // TODO: Better error handling?
+      case Left(err) =>
+        println("Failed to load prelude or user prelude: " + err)
+
       case Right((_, c)) => REPL.start(c)
     }
+  } else {
+    REPL.start(new Context())
   }
 
   // Parsing out a list of files.
@@ -40,7 +45,8 @@ object Main {
   // The entry point to the application.
   def main(args: Array[String]): Unit = args.toList match {
     case _ if (sys.env.get("CLASPPATH") == None) => printConfigure
-    case Nil                                     => startRepl
+    case "noprelude" :: Nil                      => startRepl(false)
+    case Nil                                     => startRepl(true)
     case "help" :: Nil                           => printHelp
     case "noprelude" :: x :: xs                  => parseFiles(x :: xs)
     case x :: xs                                 => parseFiles(preludePath :: userPrelude :: x :: xs)
