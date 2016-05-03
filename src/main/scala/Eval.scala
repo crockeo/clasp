@@ -207,6 +207,20 @@ object Eval {
       Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: []"))
   }
 
+  // Finding the length of a string or a list.
+  private def builtin_len(t: Token, c: Context): ClaspResult = t match {
+    case TList(List(TAtom("len"), t)) => t match {
+      case TList(l)   => Right(TInt(l.length), c)
+      case TString(s) => Right(TInt(s.length), c)
+
+      case _ =>
+        Left(new ClaspError(ClaspError.TypeError, "Invalid call to builtin: len; you can only take the length of lists and strings."))
+    }
+
+    case _ =>
+      Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: len"))
+  }
+
   // Executing a quoted token.
   private def builtin_exec(t: Token, c: Context): ClaspResult = t match {
     case TList(List(TAtom("exec"), TQuote(qt))) => Eval(qt, c)
@@ -273,6 +287,7 @@ object Eval {
     "*"   -> builtin_mul,
     "/"   -> builtin_div,
     "[]"  -> builtin_index,
+    "len" -> builtin_len,
     "exec" -> builtin_exec,
     "tostr" -> builtin_tostr,
     "print" -> builtin_print,
