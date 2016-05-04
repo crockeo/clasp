@@ -102,6 +102,11 @@ object Language extends RegexParsers {
     case _             => Nil
   }
 
+  // Checking if a reader solely has whitespace left.
+  private def onlyWhitespaceLeft(r: Reader[Char]): Boolean =
+    if (r.atEnd) true
+    else r.first.isWhitespace && onlyWhitespaceLeft(r.rest)
+
   // Reducing the result from a parseSafe call into something usable.
   private def reduceSafeParse(pr: ParseResult[Token]): Either[ClaspError, List[Token]] = pr match {
     case Success(t, r) if (r.atEnd) => Right(List(t))
@@ -111,9 +116,12 @@ object Language extends RegexParsers {
         case Right(ts) => Right(t :: ts)
       }
 
-    case Failure(t, _) =>
+    case Failure(t, r) if (onlyWhitespaceLeft(r)) => Right(Nil)
+    case Error  (t, r) if (onlyWhitespaceLeft(r)) => Right(Nil)
+
+    case Failure(t, r) =>
       Left(new ClaspError(ClaspError.SyntaxError, "Failed to parse: " + t))
-    case Error  (t, _) =>
+    case Error  (t, r) =>
       Left(new ClaspError(ClaspError.SyntaxError, "Failed to parse: " + t))
   }
 
