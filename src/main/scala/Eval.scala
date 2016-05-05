@@ -63,6 +63,40 @@ object Eval {
       Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: eq"))
   }
 
+  // Checking if an item is greater than another.
+  private def builtin_gt(t: Token, c: Context): ClaspResult = t match {
+    case TList(List(TAtom(">"), t1, t2)) => (t1, t2) match {
+      case (TInt(a),   TInt(b))     => Right(TBool(a > b), c)
+      case (TInt(a),   TFloat(b))   => Right(TBool(a > b), c)
+      case (TFloat(a), TInt(b))     => Right(TBool(a > b), c)
+      case (TFloat(a), TFloat(b))   => Right(TBool(a > b), c)
+      case (TString(a), TString(b)) => Right(TBool(a > b), c)
+
+      case _ =>
+        Left(new ClaspError(ClaspError.ValueError, "Invalid call to builtin: gt; mismatched types."))
+    }
+
+    case _ =>
+      Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: gt"))
+  }
+
+  // Checking if an item is less than another.
+  private def builtin_lt(t: Token, c: Context): ClaspResult = t match {
+    case TList(List(TAtom("<"), t1, t2)) => (t1, t2) match {
+      case (TInt(a),   TInt(b))     => Right(TBool(a < b), c)
+      case (TInt(a),   TFloat(b))   => Right(TBool(a < b), c)
+      case (TFloat(a), TInt(b))     => Right(TBool(a < b), c)
+      case (TFloat(a), TFloat(b))   => Right(TBool(a < b), c)
+      case (TString(a), TString(b)) => Right(TBool(a < b), c)
+
+      case _ =>
+        Left(new ClaspError(ClaspError.ValueError, "Invalid call to builtin lt; mismatched types."))
+    }
+
+    case _ =>
+      Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: lt"))
+  }
+
   // Negating a boolean or an integer.
   private def builtin_not(t: Token, c: Context): ClaspResult = t match {
     case TList(List(TAtom("!"), t)) => t match {
@@ -101,7 +135,7 @@ object Eval {
 
       case _ =>
         Left(new ClaspError(ClaspError.SyntaxError,
-          "Invalid call to builtin: and; you can only OR booleans and integers."))
+          "Invalid call to builtin: or; you can only OR booleans and integers."))
     }
 
     case _ =>
@@ -276,7 +310,9 @@ object Eval {
   // The set of built-in functions.
   private val builtIns: Map[String, (Token, Context) => ClaspResult] = Map(
     "=" -> builtin_eq,
-    "not" -> builtin_not,
+    ">" -> builtin_gt,
+    "<" -> builtin_lt,
+    "!" -> builtin_not,
     "|" -> builtin_or,
     "&" -> builtin_and,
     "^" -> builtin_xor,
@@ -307,8 +343,15 @@ object Eval {
           case (TAtom(name), a) => c + (name -> a)
         })
 
-        // TODO: One day make this less disgusting.
-        body match {
+        // TODO: FINISH HIM
+        (body match {
+          // Executing built-ins.
+          case TList(TAtom(name) :: xs) if (builtIns.contains(name)) => builtIns(name)(body, ec)
+
+          // Executing functions.
+          case TList(TFunction(_, _) :: xs) => applyFn(body, ec)
+
+          // Executing lists of commands.
           case TList(b) => b.foldLeft(Right(t, ec): ClaspResult)((p, t) => p match {
             case Left(err)     => Left(err)
             case Right((_, c)) => Eval(t, c) match {
@@ -317,7 +360,11 @@ object Eval {
             }
           })
 
+          // Executing anything else.
           case _        => Eval(body, ec)
+        }) match {
+          case Left(err)   => Left(err)
+          case Right((t, _)) => Right(t, c) // Escaping out of the context.
         }
       }
 
@@ -329,16 +376,10 @@ object Eval {
 
   // Evaluating a list of arguments.
   def evalList(l: List[Token], c: Context): ClaspResult =
-    l.foldRight(Right((TList(Nil), c)): ClaspResult)((v, p) => p match {
-      case Left(err)             => Left(err)
-      case Right((TList(xs), c)) => Eval(v, c) match {
-        case Left(err)     => Left(err)
-        case Right((v, c)) => Right(TList(v :: xs), c)
-      }
-
-      case _                     =>
-        Left(new ClaspError(ClaspError.SyntaxError, "Malformed list evaluation - I don't know how this happened."))
-    })
+    l.foldRight(Right(List(), c): Either[ClaspError, (List[Token], Context)])((v, ep) => for {
+      p <- ep
+      e <- Eval(v, p._2)
+    } yield (e._1 :: p._1, e._2)).map({ case (v, c) => (TList(v), c) })
 
   // Evaluating a token into its reduced form.
   def apply(t: Token, c: Context): ClaspResult = t match {
