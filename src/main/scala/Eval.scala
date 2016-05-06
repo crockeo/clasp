@@ -346,10 +346,16 @@ object Eval {
         // TODO: FINISH HIM
         (body match {
           // Executing built-ins.
-          case TList(TAtom(name) :: xs) if (builtIns.contains(name)) => builtIns(name)(body, ec)
+          case TList(TAtom(name) :: xs) if (builtIns.contains(name)) => for {
+            elist <- evalList(TAtom(name) :: xs, ec)
+            bi <- builtIns(name)(TList(elist._1), elist._2)
+          } yield bi
 
           // Executing functions.
-          case TList(TFunction(_, _) :: xs) => applyFn(body, ec)
+          case TList(TFunction(args, body) :: xs) => for {
+            elist <- evalList(xs, ec)// TODO
+            afn <- applyFn(TList(TFunction(args, body) :: elist._1), elist._2)
+          } yield (afn._1, c)
 
           // Executing lists of commands.
           case TList(b) => b.foldLeft(Right(t, ec): ClaspResult)((p, t) => p match {
@@ -375,11 +381,11 @@ object Eval {
   // General evaluation.
 
   // Evaluating a list of arguments.
-  def evalList(l: List[Token], c: Context): ClaspResult =
+  def evalList(l: List[Token], c: Context): Either[ClaspError, (List[Token], Context)] =
     l.foldRight(Right(List(), c): Either[ClaspError, (List[Token], Context)])((v, ep) => for {
       p <- ep
       e <- Eval(v, p._2)
-    } yield (e._1 :: p._1, e._2)).map({ case (v, c) => (TList(v), c) })
+    } yield (e._1 :: p._1, e._2))
 
   // Evaluating a token into its reduced form.
   def apply(t: Token, c: Context): ClaspResult = t match {
@@ -395,9 +401,9 @@ object Eval {
     case TList(l) => evalList(l, c) match {
       case Left(err) => Left(err)
       case Right(t)  => t._1 match {
-        case TList(TAtom(name) :: xs) if (builtIns.contains(name)) => builtIns(name)(t._1, t._2)
-        case TList(TFunction(_, _) :: xs)                          => applyFn(t._1, t._2)
-        case _                                                     => Right(t)
+        case TAtom(name) :: xs if (builtIns.contains(name)) => builtIns(name)(TList(t._1), t._2)
+        case TFunction(_, _) :: xs                          => applyFn(TList(t._1), t._2)
+        case _                                              => Right(TList(t._1), t._2)
       }
     }
 
