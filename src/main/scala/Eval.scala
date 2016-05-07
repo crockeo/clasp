@@ -214,7 +214,7 @@ object Eval {
 
   // Dividing a list of numbers (left to right).
   private def builtin_div(t: Token, c: Context): ClaspResult = t match {
-    case TList(TAtom("*") :: xs) =>
+    case TList(TAtom("/") :: xs) =>
       reduceList(xs, c)((a, b) => (a, b) match {
         case (TInt(x),   TInt(y))   => Right(TInt(x / y), c)
         case (TFloat(x), TInt(y))   => Right(TFloat(x / y), c)

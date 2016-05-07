@@ -18,7 +18,11 @@ class EvalTests extends FunSuite {
   import Result._
 
   val emptyCtx = new Context()
-  val withVars = emptyCtx + ("a" -> TInt(5)) + ("b" -> TFunction(List(TAtom("num")), TAtom("num")))
+  val withVars = emptyCtx +
+    ("a" -> TInt(5)) +
+    ("b" -> TFunction(List(TAtom("num")), TAtom("num"))) +
+    ("testfn" -> Language.parse("(lambda (n) (if (> n 0) #t #f))")) +
+    ("recur" -> Language.parse("(lambda (n) (if (= n 0) 0 (+ 1 (recur (/ n 2)))))"))
 
   test("self eval") {
     assert(Eval(TQuote(TAtom("a")), emptyCtx) == Right(TQuote(TAtom("a")), emptyCtx))
@@ -32,10 +36,18 @@ class EvalTests extends FunSuite {
 
   test("function application") {
     assert(Eval(parse("(b 20)"), withVars) == Right(TInt(20), withVars))
+    assert(File.runStr("(testfn 0)", withVars) == Right(TBool(false), withVars))
+    assert(File.runStr("(testfn 12)", withVars) == Right(TBool(true), withVars))
   }
 
   test("list eval") {
     assert(Eval(parse("((| #t #f) (& #t #f))"), emptyCtx) == Right(TList(List(TBool(true), TBool(false))), emptyCtx))
+  }
+
+  test("recursion") {
+    assert(File.runStr("(recur 0)", withVars) == Right(TInt(0), withVars))
+    assert(File.runStr("(recur 2)", withVars) == Right(TInt(1), withVars))
+    assert(File.runStr("(recur 16)", withVars) == Right(TInt(4), withVars))
   }
 }
 
@@ -183,6 +195,8 @@ class BuiltinTests extends FunSuite {
 
   test("builtin_if") {
     assert(Eval(parse("(if #t a b)"), empt) == Right(TAtom("a"), empt))
+    assert(Eval(parse("(if (= 0 0) a b)"), empt) == Right(TAtom("a"), empt))
     assert(Eval(parse("(if #f a b)"), empt) == Right(TAtom("b"), empt))
+    assert(Eval(parse("(if (= 0 1) a b)"), empt) == Right(TAtom("b"), empt))
   }
 }
