@@ -64,7 +64,12 @@ object Language extends RegexParsers {
   lazy val list: Parser[TList] =
     "(" ~ spaced ~ ")" ^^ { case ~(~(_, a), _) => TList(a) }
 
+  // A comment.
+  lazy val comment: Parser[Token] =
+    "''.*\n".r ^^ { case _ => none }
+
   lazy val clasp: Parser[Token] =
+    comment |
     quote |
     atom |
     bool |
