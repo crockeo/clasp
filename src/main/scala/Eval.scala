@@ -157,6 +157,10 @@ object Eval {
   private def builtin_add(t: Token, c: Context): ClaspResult = t match {
     case TList(TAtom("+") :: xs) =>
       reduceList(xs, c)((a, b) => (a, b) match {
+        case (TList(ts1), TList(ts2)) => Right(TList(ts1 ++ ts2), c)
+        case (t, TList(ts))           => Right(TList(t :: ts), c)
+        case (TList(ts), t)           => Right(TList(ts ++ List(t)), c)
+
         case (TString(s), t) => Right(TString(s + t.toString), c)
         case (t, TString(s)) => Right(TString(t.toString + s), c)
 

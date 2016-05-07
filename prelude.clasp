@@ -11,11 +11,21 @@
     list
     (drop (- n 1) (tail list))))
 
+'' Checking if a list is empty.
+(defn is-empty (list)
+  (= 0 (len list)))
+
+'' Performing some function over each element in a list.
+(defn map (fn list)
+  (if (is-empty list)
+    list
+    (+ (fn (head list)) (map fn (tail list)))))
+
 '' Performing a switch/case statement, but on solely boolean arguments. Finds
 '' the first boolean that's true and executes the quote it's paired with.
 (defn bool-switch (cases)
   (if (= 0 (len cases))
-    ()
-    (if ([] 0 ([] 0 cases))
-      (exec ([] 1 ([] 0 cases)))
-      (bool-switch (tail cases))))) '' TODO: Reducing the list?
+   (print "ala")
+   (if ([] 0 ([] 0 cases))
+     (exec ([] 1 ([] 0 cases)))
+     (bool-switch (tail cases)))))
