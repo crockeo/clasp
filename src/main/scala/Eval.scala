@@ -43,12 +43,8 @@ object Eval {
     case TList(List(TAtom("defn"), TAtom(name), TList(args), body)) =>
       if (builtIns.contains(name))
         Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: defn; cannot redefine builtin functions."))
-      else {
-        Eval(Language.parse(s"(def $name (lambda ${TList(args)} $body))"), c) match {
-          case Right(r)  => Right(r)
-          case Left(err) => Left(err)
-        }
-      }
+      else
+        Eval(Language.parse(s"(def $name (lambda ${TList(args)} $body))"), c)
 
     case _ =>
       Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: defn; invalid syntax."))
@@ -231,10 +227,10 @@ object Eval {
 
   // Indexing into a list or string.
   private def builtin_index(t: Token, c: Context): ClaspResult = t match {
-    case TList(List(TAtom("[]"), TInt(n), TList(l))) =>
+    case TList(List(TAtom("[]"), TInt(n), TList(l))) if (n < l.length) =>
       Right(l(n), c)
 
-    case TList(List(TAtom("[]"), TInt(n), TString(s))) =>
+    case TList(List(TAtom("[]"), TInt(n), TString(s))) if (n < s.length) =>
       Right(TChar(s.charAt(n)), c)
 
     case _ =>
@@ -253,6 +249,34 @@ object Eval {
 
     case _ =>
       Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: len"))
+  }
+
+  // Finding the head of a list.
+  private def builtin_head(t: Token, c: Context): ClaspResult = t match {
+    case TList(List(TAtom("head"), TList(l))) => l match {
+      case x :: _ => 
+        Right(x, c)
+
+      case Nil =>
+        Left(new ClaspError(ClaspError.ValueError, "Invalid call to builtin: head; head on empty list."))
+    }
+
+    case _ =>
+      Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: head"))
+  }
+
+  // Finding the tail of a list.
+  private def builtin_tail(t: Token, c: Context): ClaspResult = t match {
+    case TList(List(TAtom("tail"), TList(l))) => l match {
+      case _ :: xs =>
+        Right(TList(xs), c)
+
+      case Nil =>
+        Left(new ClaspError(ClaspError.ValueError, "Invalid call to builtin: tail; tail on empty list."))
+    }
+
+    case _ =>
+      Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: tail"))
   }
 
   // Executing a quoted token.
@@ -324,6 +348,8 @@ object Eval {
     "/"   -> builtin_div,
     "[]"  -> builtin_index,
     "len" -> builtin_len,
+    "head" -> builtin_head,
+    "tail" -> builtin_tail,
     "exec" -> builtin_exec,
     "tostr" -> builtin_tostr,
     "print" -> builtin_print,
