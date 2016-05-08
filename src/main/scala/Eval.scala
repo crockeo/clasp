@@ -2,6 +2,7 @@ package com.crockeo.clasp
 
 // Evaluation of language constructs.
 object Eval {
+  import Implicits._
   import Language._
   import Result._
 

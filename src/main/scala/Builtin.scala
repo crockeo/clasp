@@ -2,6 +2,7 @@ package com.crockeo.clasp
 
 // The set of built-in functionality that exists in the language.
 object Builtin {
+  import Implicits._
   import Result._
 
   ////
