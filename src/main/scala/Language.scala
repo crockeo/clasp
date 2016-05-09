@@ -70,6 +70,7 @@ object Language extends RegexParsers {
 
   lazy val clasp: Parser[Token] =
     comment |
+    char |
     quote |
     atom |
     bool |

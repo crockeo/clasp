@@ -33,6 +33,17 @@ class LanguageParseTests extends FunSuite {
     assert(p("#f", TBool(false)))
   }
 
+  test("char") {
+    val p = correctParser(char)_
+
+    assert(p("'a'", TChar('a')))
+    assert(p("'b'", TChar('b')))
+    assert(p("'c'", TChar('c')))
+    assert(p("'d'", TChar('d')))
+    assert(p("'e'", TChar('e')))
+    assert(p("' '", TChar(' ')))
+  }
+
   test("string") {
     val p = correctParser(string)_
 
@@ -85,6 +96,12 @@ class LanguageParseTests extends FunSuite {
     assert(p("test", TAtom("test")))
     assert(p("#t", TBool(true)))
     assert(p("#f", TBool(false)))
+    assert(p("'a'", TChar('a')))
+    assert(p("'b'", TChar('b')))
+    assert(p("'c'", TChar('c')))
+    assert(p("'d'", TChar('d')))
+    assert(p("'e'", TChar('e')))
+    assert(p("' '", TChar(' ')))
     assert(p("\"test\"", TString("test")))
     assert(p("5", TInt(5)))
     assert(p("5.0", TFloat(5)))
