@@ -30,8 +30,17 @@
 '' Performing a switch/case statement, but on solely boolean arguments. Finds
 '' the first boolean that's true and executes the quote it's paired with.
 (defn bool-switch (cases)
-  (if (= 0 (len cases))
-   (print "ala")
-   (if ([] 0 ([] 0 cases))
-     (exec ([] 1 ([] 0 cases)))
-     (bool-switch (tail cases)))))
+  (if (is-empty cases)
+    ()
+    (if (head (head cases))
+      (exec ([] 1 (head cases)))
+      (bool-switch (tail cases)))))
+
+'' Performing a switch/case statement on values to match against a passed-in
+'' value. The 'default' atom will be matched no matter what.
+(defn switch (v cases)
+  (if (is-empty cases)
+    ()
+    (if (| (= default (head (head cases))) (= v (head (head cases))))
+      (exec ([] 1 (head cases)))
+      (switch v (tail cases)))))
