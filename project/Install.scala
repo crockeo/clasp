@@ -10,7 +10,7 @@ object InstallCommand {
   val manifestPath = "install_manifest.txt"
   val deployPath = "/usr/local/bin/clasp"
   val bash = """#!/usr/bin/env bash
-CLASPPATH={cwd} java -jar {cwd}/target/clasp.jar"""
+CLASPPATH={cwd} java -jar {cwd}/target/clasp.jar $@"""
 
   // Performing an installation of the language into a given location. Creates
   // an installation.txt file in the main project directory to track

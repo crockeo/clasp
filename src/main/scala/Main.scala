@@ -26,16 +26,18 @@ object Main {
   }
 
   // Starting the repl.
-  def startRepl(withPrelude: Boolean): Unit =
-  if (withPrelude) {
-    File.run(List(preludePath, userPrelude), new Context()) match {
-      case Left(err) =>
-        println("Failed to load prelude or user prelude: " + err)
+  def startRepl(withPrelude: Boolean): Unit = {
+    println("|| clasp REPL ||")
+    if (withPrelude) {
+      File.run(List(preludePath, userPrelude), new Context()) match {
+        case Left(err) =>
+          println("Failed to load prelude or user prelude: " + err)
 
-      case Right((_, c)) => REPL.start(c)
+        case Right((_, c)) => REPL.start(c)
+      }
+    } else {
+      REPL.start(new Context())
     }
-  } else {
-    REPL.start(new Context())
   }
 
   // Parsing out a list of files.

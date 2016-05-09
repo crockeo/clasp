@@ -13,6 +13,9 @@ For deployment, use `sbt install` and `sbt uninstall`. It'll install a bash
 script named `clasp` into `/usr/local/bin` that executes the `clasp.jar` within
 the project's directory.
 
+Simply run the language by calling `clasp` in your terminal. For help call
+`clasp help`.
+
 ### Licensing
 
 Refer to `LICENSE`.
