@@ -5,6 +5,7 @@ libraryDependencies += "org.scala-lang.modules" %% "scala-parser-combinators" % 
 libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.13.0" % "test"
 libraryDependencies += "org.scalactic" %% "scalactic" % "2.2.6"
 libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % "test"
+libraryDependencies += "org.scala-lang" % "jline" % "2.9.0-1"
 
 // Configuring the project.
 lazy val commonSettings = Seq(

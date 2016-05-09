@@ -1,50 +1,33 @@
 package com.crockeo.clasp
 
+import tools.jline.console.ConsoleReader
 import scala.annotation.tailrec
 import scala.io.StdIn
 import Result._
 
 object REPL {
-  // Starting the REPL.
-  @tailrec
-  def start(c: Context): Unit = {
-    print("> ")
-    val line = StdIn.readLine
+  // Creating the console reader.
+  private lazy val reader: ConsoleReader = new ConsoleReader()
 
-    if (line != "(q)" && line != "(quit)")
-      File.runStr(line, c) match {
+  // Starting the REPL.
+  def start(c: Context): Unit = {
+    reader.setPrompt("> ")
+
+    var line: String = reader.readLine
+    var cc: Context = c
+    while (line != "(q)" && line != "(quit)") {
+      File.runStr(line, cc) match {
         case Left(err) => {
-          println(err)
-          start(c)
+          reader.println(err.toString)
         }
 
         case Right((v, c)) => {
-          println(v)
-          start(c)
+          reader.println(v.toString)
+          cc = c
         }
       }
 
-      //Language.parseSet(line) match {
-        //case Nil => {
-          //println("Failed to parse line: \"" + line + "\"")
-          //start(c)
-        //}
-
-        //case l   =>
-          //l.foldLeft(Right(Language.none, c): ClaspResult)((p, t) => p match {
-            //case Left(err)     => Left(err)
-            //case Right((_, c)) => Eval(t, c)
-          //}) match {
-            //case Left(err) => {
-              //println(err)
-              //start(c)
-            //}
-
-            //case Right((v, c)) => {
-              //println(v)
-              //start(c)
-            //}
-          //}
-      //}
+      line = reader.readLine
+    }
   }
 }
