@@ -35,6 +35,12 @@ class PreludeTests extends FunSuite {
 
   test("drop") {
     assert(eparse("(drop 0 (1 2 3))") == Right(TList(List(TInt(1), TInt(2), TInt(3))), prelude))
+    assert(eparse("(drop 1 (1 2 3))") == Right(TList(List(TInt(2), TInt(3))), prelude))
+  }
+
+  test("take") {
+    assert(eparse("(take 0 (1 2 3))") == Right(TList(Nil), prelude))
+    assert(eparse("(take 2 (1 2 3))") == Right(TList(List(TInt(1), TInt(2))), prelude))
   }
 
   test("bool-switch") {

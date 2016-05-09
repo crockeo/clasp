@@ -5,15 +5,21 @@
 (defn leq (a b)
   (| (= a b) (< a b)))
 
+'' Checking if a list is empty.
+(defn is-empty (list)
+  (= 0 (len list)))
+
 '' Dropping the first N elements of a list.
 (defn drop (n list)
   (if (= n 0)
     list
     (drop (- n 1) (tail list))))
 
-'' Checking if a list is empty.
-(defn is-empty (list)
-  (= 0 (len list)))
+'' Taking the first n elements from a list.
+(defn take (n list)
+  (if (| (is-empty list) (= n 0))
+    ()
+    (+ ([] 0 list) (take (- n 1) (tail list)))))
 
 '' Performing some function over each element in a list.
 (defn map (fn list)
