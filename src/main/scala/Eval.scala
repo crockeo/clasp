@@ -19,28 +19,20 @@ object Eval {
           case (TAtom(name), a) => c + (name -> a)
         })
 
-        // TODO: FINISH HIM
         (body match {
           // Executing built-ins.
-          case TList(TAtom(name) :: xs) if (Builtin.contains(name)) => for {
-            elist <- evalList(xs, ec)
-            bi <- Builtin(name)(elist._1, elist._2)
-          } yield bi
+          case TList(TAtom(name) :: xs) if (Builtin.contains(name)) =>
+            Eval(body, ec)
 
           // Executing functions.
-          case TList(TFunction(args, body) :: xs) => for {
-            elist <- evalList(xs, ec)// TODO
-            afn <- applyFn(TList(TFunction(args, body) :: elist._1), elist._2)
-          } yield (afn._1, c)
+          case TList(TFunction(args, body) :: xs) =>
+            Eval(body, ec)
 
           // Executing lists of commands.
-          case TList(b) => b.foldLeft(Right(t, ec): ClaspResult)((p, t) => p match {
-            case Left(err)     => Left(err)
-            case Right((_, c)) => Eval(t, c) match {
-              case Left(err)     => Left(err)
-              case Right((t, c)) => Right(t, c)
-            }
-          })
+          case TList(b) => b.foldLeft(Right(t, ec): ClaspResult)((p, t) => for {
+            ep <- p
+            et <- Eval(t, ep._2)
+          } yield et)
 
           // Executing anything else.
           case _        => Eval(body, ec)
@@ -72,6 +64,10 @@ object Eval {
     // the rest of the arguments be applied yet.
     case TList(TAtom("defn") :: xs) =>
       Builtin("defn")(xs, c)
+
+    // Singling out 'if' as well.
+    case TList(TAtom("if") :: xs) =>
+      Builtin("if")(xs, c)
 
     // Working with lists.
     case TList(l) => evalList(l, c) match {

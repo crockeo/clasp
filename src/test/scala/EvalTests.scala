@@ -22,7 +22,7 @@ class EvalTests extends FunSuite {
     ("a" -> TInt(5)) +
     ("b" -> TFunction(List(TAtom("num")), TAtom("num"))) +
     ("testfn" -> Language.parse("(lambda (n) (if (> n 0) #t #f))")) +
-    ("recur" -> Language.parse("(lambda (n) (if (= n 0) 0 (+ 1 (recur (/ n 2)))))"))
+    ("recur" -> Language.parse("(lambda (n) (if (= n 1) 0 (+ 1 (recur (/ n 2)))))"))
 
   test("self eval") {
     assert(Eval(TQuote(TAtom("a")), emptyCtx) == Right(TQuote(TAtom("a")), emptyCtx))
@@ -45,7 +45,7 @@ class EvalTests extends FunSuite {
   }
 
   test("recursion") {
-    assert(File.runStr("(recur 0)", withVars) == Right(TInt(0), withVars))
+    assert(File.runStr("(recur 1)", withVars) == Right(TInt(0), withVars))
     assert(File.runStr("(recur 2)", withVars) == Right(TInt(1), withVars))
     assert(File.runStr("(recur 16)", withVars) == Right(TInt(4), withVars))
   }
