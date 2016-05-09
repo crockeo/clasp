@@ -26,7 +26,7 @@ object Language extends RegexParsers {
 
   // Parsing a quoted string.
   lazy val string: Parser[TString] =
-    "\".+\"".r ^^ { s => TString(s.substring(1, s.length - 1)) }
+    "\".*?\"".r ^^ { s => TString(s.substring(1, s.length - 1)) }
 
   // Parsing out a raw integer (without casting it to anything).
   lazy val intRaw: Parser[Int] =

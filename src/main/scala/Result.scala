@@ -29,7 +29,7 @@ object Result {
 
   case class TString(s: String) extends Token {
     override def toString(): String =
-      "\"" + s + "\""
+      s
   }
 
   case class TInt(n: Int) extends Token {

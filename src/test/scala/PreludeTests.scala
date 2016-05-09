@@ -40,6 +40,7 @@ class PreludeTests extends FunSuite {
   test("bool-switch") {
     assert(eparse("(bool-switch ((#f '5) (#t '2)))") == Right(TInt(2), prelude))
     assert(eparse("(bool-switch ((#t '5) (#t '2)))") == Right(TInt(5), prelude))
+    assert(eparse("(bool-switch ((#f '5) (#f '5)))") == Right(TList(Nil), prelude))
   }
 
   test("switch") {

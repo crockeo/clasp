@@ -50,6 +50,7 @@ class LanguageParseTests extends FunSuite {
     assert(p("\"test\"", TString("test")))
     assert(!p("\"ayy lmao", TString("ayy lmao")))
     assert(!p("ayy lmao", TString("ayy lmao")))
+    assert(!p("\"test\" \"test2\"", TString("test\" \"test2")))
   }
 
   test("int") {

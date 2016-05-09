@@ -307,20 +307,18 @@ object Builtin {
 
   // If/else blocks.
   private def builtin_if(t: List[Token], c: Context): ClaspResult = t match {
-    case b :: t :: f :: Nil => Eval(b, c) match {
+    case List(b, t, f) => Eval(b, c) match {
       case Left(err)       => Left(err)
       case Right((TBool(b), c)) =>
         if (b) Eval(t, c)
         else   Eval(f, c)
 
       case _ =>
-      Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: if; if is not a bool."))
+        Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: if; val is not a bool."))
     }
 
-    case _ => {
-      println(t)
+    case o =>
       Left(new ClaspError(ClaspError.SyntaxError, "Invalid call to builtin: if"))
-    }
   }
 
   // The set of built-in functions.
