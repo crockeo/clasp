@@ -43,6 +43,15 @@ class PreludeTests extends FunSuite {
     assert(eparse("(take 2 (1 2 3))") == Right(TList(List(TInt(1), TInt(2))), prelude))
   }
 
+  test("set") {
+    assert(eparse("(set 1 8 (1 2 3))") == Right(TList(List(TInt(1), TInt(8), TInt(3))), prelude))
+  }
+
+  test("map") {
+    assert(eparse("(map (lambda (n) (+ n 1)) (1 2 3))") ==
+      Right(TList(List(TInt(2), TInt(3), TInt(4))), prelude))
+  }
+
   test("bool-switch") {
     assert(eparse("(bool-switch ((#f '5) (#t '2)))") == Right(TInt(2), prelude))
     assert(eparse("(bool-switch ((#t '5) (#t '2)))") == Right(TInt(5), prelude))

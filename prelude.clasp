@@ -21,6 +21,10 @@
     ()
     (+ ([] 0 list) (take (- n 1) (tail list)))))
 
+'' Setting the value in a list to be some other value.
+(defn set (n v list)
+  (+ (take n list) (v) (drop (+ n 1) list)))
+
 '' Performing some function over each element in a list.
 (defn map (fn list)
   (if (is-empty list)
