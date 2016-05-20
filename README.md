@@ -16,6 +16,11 @@ the project's directory.
 Simply run the language by calling `clasp` in your terminal. For help call
 `clasp help`.
 
+### Editing
+
+* [Vim](http://github.com/crockeo/clasp.vim)
+* Other Editors: Make your own! (Sorry)
+
 ### Licensing
 
 Refer to `LICENSE`.
